@@ -434,6 +434,15 @@ func (ks *KeyStore) Export(a accounts.Account, passphrase, newPassphrase string)
 	return EncryptKey(key, newPassphrase, N, P)
 }
 
+// ExportECSDAKey exports as a ECSDA key, encrypted with newPassphrase.
+func (ks *KeyStore) ExportECSDAKey(a accounts.Account, passphrase string) (keyECSDA []byte, err error) {
+	_, key, err := ks.getDecryptedKey(a, passphrase)
+	if err != nil {
+		return nil, err
+	}
+	return crypto.FromECDSA(key.PrivateKey), err
+}
+
 // Import stores the given encrypted JSON key into the key directory.
 func (ks *KeyStore) Import(keyJSON []byte, passphrase, newPassphrase string) (accounts.Account, error) {
 	key, err := DecryptKey(keyJSON, passphrase)

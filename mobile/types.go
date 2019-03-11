@@ -25,6 +25,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
 	"github.com/ethereum/go-ethereum/rlp"
 	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
 )
@@ -221,6 +222,25 @@ func NewTransactionFromRLP(data []byte) (*Transaction, error) {
 		return nil, err
 	}
 	return tx, nil
+}
+
+//GenerateERC20TransferData create data for transaction
+func GenerateERC20TransferData(toAddress *Address, amount *BigInt) ([]byte, error) {
+
+	transferFnSignature := []byte("transfer(address,uint256)")
+	hash := sha3.NewKeccak256()
+	hash.Write(transferFnSignature)
+	methodID := hash.Sum(nil)[:4]
+
+	paddedAmount := common.LeftPadBytes(amount.bigint.Bytes(), 32)
+	paddedAddress := common.LeftPadBytes(toAddress.address.Bytes(), 32)
+
+	var data []byte
+	data = append(data, methodID...)
+	data = append(data, paddedAddress...)
+	data = append(data, paddedAmount...)
+
+	return data, nil
 }
 
 // EncodeRLP encodes a transaction into an RLP data dump.

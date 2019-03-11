@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -186,6 +187,21 @@ func (ks *KeyStore) UpdateAccount(account *Account, passphrase, newPassphrase st
 // ExportKey exports as a JSON key, encrypted with newPassphrase.
 func (ks *KeyStore) ExportKey(account *Account, passphrase, newPassphrase string) (key []byte, _ error) {
 	return ks.keystore.Export(account.account, passphrase, newPassphrase)
+}
+
+// ExportECSDAKey exports as a ECSDA key, encrypted with newPassphrase.
+func (ks *KeyStore) ExportECSDAKey(account *Account, passphrase string) (keyECSDA []byte, err error) {
+	return ks.keystore.ExportECSDAKey(account.account, passphrase)
+}
+
+// ExportECSDAKeyHex exports as a ECSDA key, encrypted with newPassphrase.
+func (ks *KeyStore) ExportECSDAKeyHex(account *Account, passphrase string) (string, error) {
+	privateKey, err := ks.keystore.ExportECSDAKey(account.account, passphrase)
+	if err != nil {
+		return "", err
+	}
+
+	return hexutil.Encode(privateKey)[2:], nil
 }
 
 // ImportKey stores the given encrypted JSON key into the key directory.
